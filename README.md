@@ -93,3 +93,4 @@ Resources) is UI-only, same as in the original prototype — there's no billing 
 gating wired up yet. That's a separate project (e.g. Stripe + a `plan` column on
 `profiles`) whenever you're ready for it.
 "# hiddenyardssept" 
+"# hiddenyardssept" 

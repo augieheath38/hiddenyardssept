@@ -55,3 +55,32 @@ create policy "Users can update their own games"
 create policy "Users can delete their own games"
   on public.games for delete
   using (auth.uid() = user_id);
+
+-- Auto-create a profile row whenever someone signs up, using the
+-- school_name/level passed in as auth signup metadata. Runs with elevated
+-- privileges (security definer), so it bypasses RLS -- this replaces having
+-- the client insert its own profile row right after signup, which fails
+-- because the user isn't authenticated yet if email confirmation is on.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id, school_name, level, email)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'school_name', ''),
+    coalesce(new.raw_user_meta_data->>'level', 'High School'),
+    new.email
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();

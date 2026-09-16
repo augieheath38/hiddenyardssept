@@ -512,20 +512,18 @@ function AuthPage({ onAuthed, onToast }) {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim(),
           password,
+          options: {
+            data: {
+              school_name: schoolName.trim(),
+              level,
+            },
+          },
         });
         if (signUpError) throw signUpError;
 
-        // If email confirmation is required, there may be no session yet.
-        const userId = data.user?.id;
-        if (userId) {
-          const { error: profileError } = await supabase.from("profiles").upsert({
-            id: userId,
-            school_name: schoolName.trim(),
-            level,
-            email: email.trim(),
-          });
-          if (profileError) throw profileError;
-        }
+        // The database trigger (handle_new_user) creates the profiles row
+        // automatically from this metadata -- no client-side insert needed,
+        // which also avoids RLS errors for unconfirmed users with no session yet.
 
         if (!data.session) {
           onToast?.("Check your email to confirm your account, then sign in.");

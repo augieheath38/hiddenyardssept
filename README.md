@@ -92,3 +92,4 @@ The "Paid tools" section (Benchmarking, Data Review, Kicker Fix Coaching,
 Resources) is UI-only, same as in the original prototype — there's no billing or
 gating wired up yet. That's a separate project (e.g. Stripe + a `plan` column on
 `profiles`) whenever you're ready for it.
+"# hiddenyardssept" 
